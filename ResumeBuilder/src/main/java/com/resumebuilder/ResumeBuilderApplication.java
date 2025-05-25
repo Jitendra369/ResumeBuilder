@@ -41,7 +41,7 @@ public class ResumeBuilderApplication implements CommandLineRunner{
         CompanyDto company = objectMapper.readValue(json, CompanyDto.class);
         
         
-		pdfService.createPdf(company);
+//		pdfService.createPdf(company);
 	}
 
 }
