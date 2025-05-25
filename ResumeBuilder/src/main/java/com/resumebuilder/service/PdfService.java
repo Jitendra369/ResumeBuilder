@@ -61,6 +61,8 @@ public class PdfService {
         table.useAllAvailableWidth();
         table.setBorder(new SolidBorder(1));
         table.setWidth(UnitValue.createPercentValue(100));
+        
+ 
 
         Cell headerCell = new Cell(1, 2)
         		.add(new Paragraph(companyDto.getCompanyName()))
