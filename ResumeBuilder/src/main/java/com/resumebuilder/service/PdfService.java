@@ -1,8 +1,11 @@
 package com.resumebuilder.service;
 
+import com.itextpdf.io.font.constants.StandardFonts;
 import com.itextpdf.kernel.colors.Color;
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.kernel.colors.DeviceRgb;
+import com.itextpdf.kernel.font.PdfFont;
+import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.geom.PageSize;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfPage;
@@ -20,7 +23,10 @@ import com.itextpdf.layout.properties.HorizontalAlignment;
 import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 import com.resumebuilder.dto.CompanyDto;
+import com.resumebuilder.dto.Experience;
+import com.resumebuilder.dto.Resume;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.naming.java.javaURLContextFactory;
 import org.springframework.stereotype.Component;
 import com.resumebuilder.dto.CompanyDto;
@@ -34,25 +40,84 @@ import java.security.KeyStore.PrivateKeyEntry;
 @Component
 public class PdfService {
 
-	private static final String path = "D:\\pdfOperation\\hello.pdf";
+	private static final String PATH = "D:\\pdfOperation\\hello.pdf";
+	private static final String PATH_RESUME_STRING = "D:\\pdfOperation\\hello.pdf";
 	private static final float MARGIN_TOP = 15f;
 	private static final float MARGIN_LEFT = 15f;
 	private static final float MARGIN_RIGHT = 15f;
 	private static final float MARGIN_BOTTOM = 15f;
 	private static final String companyInfor = "In 1947, the firm set up offices in Calcutta and Madras and New Delhi. In 1948, 55 acres of undeveloped marsh and jungle was acquired in Powai, Mumbai. In December 1950, L&T became a public company with a paid-up capital of ₹20 lakh (equivalent to ₹22 crore or US$2.6 million in 2023).";
 
+	
+	@SuppressWarnings("resource")
+	public void buildResume(Resume resume) throws IOException {
+		if (null != resume) {
+			PdfWriter writer =  new PdfWriter(PATH_RESUME_STRING);
+			PdfDocument pdfDocument = new PdfDocument(writer);
+			Document document = new Document(pdfDocument);
+			document.setMargins(MARGIN_TOP, MARGIN_RIGHT, MARGIN_BOTTOM, MARGIN_LEFT);
+			createFolderIfNotPresent(PATH_RESUME_STRING);
+				System.out.println("creating the document at the lcoation ......");
+				
+				PdfFont font = PdfFontFactory.createFont(StandardFonts.HELVETICA_BOLD);
+				
+				Paragraph userName = new Paragraph(resume.getName())
+						.setFont(font)
+						.setFontSize(30f);
+				
+				document.add(userName);
+				
+//				adding contact details 
+			    String address = resume.getContact()!=  null ? resume.getContact().getAddress() : "";
+				Paragraph userSummary = new Paragraph(address + " | "+ resume.getContact().getEmail() + " | " + resume.getContact().getEmail());
+				document.add(userSummary);
+				
+//				adding user-summary 
+				Paragraph summaryPara = new Paragraph(resume.getSummary());
+				document.add(summaryPara);
+				
+//				user-experience
+				if (CollectionUtils.isNotEmpty(resume.getExperience())) {
+					java.util.List<Experience> experiences = resume.getExperience();
+					experiences.stream().forEach(expe -> {
+						Paragraph paraDuration = new Paragraph(expe.getDuration());
+						Paragraph paraPosition = new Paragraph(expe.getPosition());
+						Paragraph paraDesc = new Paragraph(expe.getDescription());
+						document.add(paraDuration);
+						document.add(paraPosition);
+						document.add(paraDesc);
+						
+//						add new-para after each experience 
+						document.add(new Paragraph(""));
+					});
+				}
+				
+				
+			document.close();
+			try {
+				writer.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		}
+		
+		
+	}
+	
 	public void createPdf(java.util.List<CompanyDto>  companyDtos) throws FileNotFoundException {
 
-		PdfWriter writer = new PdfWriter(path);
+		PdfWriter writer = new PdfWriter(PATH);
 		PdfDocument pdfDocument = new PdfDocument(writer);
 		Document document = new Document(pdfDocument);
 		document.setMargins(MARGIN_TOP, MARGIN_RIGHT, MARGIN_BOTTOM, MARGIN_LEFT);
 
 //        createBasicPDF(path);
-		boolean isFileLocationCreated = createFolderIfNotPresent(path);
+		boolean isFileLocationCreated = createFolderIfNotPresent(PATH);
 //        createCanvasPdf(path);
 		for (CompanyDto companyDto : companyDtos) {
-			createTable(path, companyDto, document);
+			createTable(PATH, companyDto, document);
 			document.add(new Paragraph(""));
 		}
 		

@@ -22,7 +22,6 @@ public class ResumeServiceImpl implements ResumeService{
 	
 	public Resume saveResume(Resume resume) {
 		try {
-			
 			System.out.println("length of the summary is : " +resume.getSummary().length());
 			List<Experience> experience = resume.getExperience();
 			experience.stream().forEach(exp ->  System.out.println(exp.getDescription().length()));
@@ -38,6 +37,7 @@ public class ResumeServiceImpl implements ResumeService{
 		if (CollectionUtils.isNotEmpty(allResumes)) {
 			return allResumes;
 		}
+		System.out.println("no data found from DB");
 		return new ArrayList<>();
 	}
 
@@ -47,6 +47,7 @@ public class ResumeServiceImpl implements ResumeService{
 		if (resumeOptional.isPresent()) {
 			return resumeOptional.get();
 		}
+		System.out.println("no data found from DB for id "+ id);
 		return null;
 	}
 
